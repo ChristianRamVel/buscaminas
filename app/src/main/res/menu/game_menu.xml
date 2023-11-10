@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:id="@+id/instrucciones"
+        android:title="@string/instrucciones" />
+    <item android:id="@+id/nuevoJuego"
+        android:title="@string/nuevojuego"/>
+    <item android:id="@+id/configuracion"
+        android:title="@string/configurarJuego" />
+    <item android:id="@+id/seleccionarPersonaje"
+        android:title="@string/seleccionarPersonaje"
+        ></item>
+
+</menu>
