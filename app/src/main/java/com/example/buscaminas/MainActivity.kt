@@ -24,11 +24,11 @@ import kotlin.random.Random
 class MainActivity : AppCompatActivity() {
 
     private var dificultadSeleccionada: String? = null
-    private lateinit var tablero: Array<Array<Char>>
+
     companion object {
         const val MINAS_PRINCIPIANTE = 10
         const val MINAS_AMATEUR = 30
-        const val MINAS_EXPERTO = 40
+        const val MINAS_AVANZADO = 60
     }
 
 
@@ -37,13 +37,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val toolbar =  findViewById<Toolbar>(R.id.toolbar)
+        val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
         val tablero = generarTablero("principiante")
         mostrarTableroEnPantalla(tablero)
-
-
-
 
 
     }
@@ -53,6 +50,7 @@ class MainActivity : AppCompatActivity() {
         inflater.inflate(R.menu.game_menu, menu)
         return true
     }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
 
         return when (item.itemId) {
@@ -63,19 +61,27 @@ class MainActivity : AppCompatActivity() {
             }
 
             R.id.nuevoJuego -> {
-                //nuevoJuego()
+                nuevoJuego(dificultadSeleccionada ?: "principiante")
                 true
             }
+
             R.id.configuracion -> {
                 seleccionarDificultad()
                 true
             }
+
             R.id.seleccionarPersonaje -> {
                 seleccionarPersonaje()
                 true
             }
+
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    private fun nuevoJuego(dificultad: String) {
+        val tablero = generarTablero(dificultad)
+        mostrarTableroEnPantalla(tablero)
     }
 
     //funcion que muestra las instrucciones del juego al que se la pasa como contexto el activityMain
@@ -137,12 +143,18 @@ class MainActivity : AppCompatActivity() {
                 when (dificultadSeleccionada) {
                     "Principiante" -> {
                         // Lógica para el nivel Principiante
+                        nuevoJuego(dificultadSeleccionada ?: "principiante")
+
                     }
+
                     "Amateur" -> {
                         // Lógica para el nivel Amateur
+                        nuevoJuego(dificultadSeleccionada ?: "amateur")
                     }
+
                     "Avanzado" -> {
                         // Lógica para el nivel Avanzado
+                        nuevoJuego(dificultadSeleccionada ?: "avanzado")
                     }
                 }
             }
@@ -168,7 +180,11 @@ class MainActivity : AppCompatActivity() {
 
         //se crea el spinner con los personajes
         val spinner = Spinner(this)
-        spinner.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, arrayOf("Personaje 1", "Personaje 2", "Personaje 3"))
+        spinner.adapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_spinner_item,
+            arrayOf("Personaje 1", "Personaje 2", "Personaje 3")
+        )
 
         //se muestra el spinner
         builder.setView(spinner)
@@ -183,9 +199,11 @@ class MainActivity : AppCompatActivity() {
                 "Personaje 1" -> {
                     // Lógica para el personaje 1
                 }
+
                 "Personaje 2" -> {
                     // Lógica para el personaje 2
                 }
+
                 "Personaje 3" -> {
                     // Lógica para el personaje 3
                 }
@@ -198,10 +216,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun generarTablero(nivelDificultad: String): Array<Array<Char>> {
-        val (filas, columnas, minas) = when (nivelDificultad) {
+        val (filas, columnas, minas) = when (nivelDificultad.lowercase()) {
             "principiante" -> Triple(8, 8, Companion.MINAS_PRINCIPIANTE)
-            "amateur" -> Triple(1, 12, MINAS_AMATEUR)
-            "experto" -> Triple(16, 16, MINAS_EXPERTO)
+            "amateur" -> Triple(12, 12, MINAS_AMATEUR)
+            "avanzado" -> Triple(16, 16, MINAS_AVANZADO)
             else -> throw IllegalArgumentException("Nivel de dificultad no válido")
         }
 
@@ -267,53 +285,72 @@ class MainActivity : AppCompatActivity() {
         for (i in tablero.indices) {
             for (j in tablero[0].indices) {
                 val button = Button(this)
-                button.text = "" // No mostrar el valor inicialmente
 
-                // Establecer el fondo con borde gris y fondo gris más oscuro
-                //val drawable = ContextCompat.getDrawable(this, R.drawable.botones_personalizados)
-                //button.background = drawable
+                // Configurar el texto del botón con el valor del tablero en esa posición
+                button.text = tablero[i][j].toString()
 
-                // Configurar el botón para que ocupe el espacio disponible en cada celda
-                val params = GridLayout.LayoutParams()
-                params.rowSpec = GridLayout.spec(i)
-                params.columnSpec = GridLayout.spec(j)
-                button.layoutParams = params
+                // Establecer un fondo de color para los botones
+                //button.setBackgroundResource(R.drawable.button_background) // Puedes crear un archivo XML en la carpeta `res/drawable` para el fondo del botón
 
                 // Asignar un OnClickListener a cada botón
                 button.setOnClickListener {
                     // Lógica a realizar al hacer clic en el botón
-                    realizarAccion(i, j)
+                    realizarAccion(i, j, button)
                 }
+
+                // Configurar parámetros de diseño del botón
+                val params = GridLayout.LayoutParams()
+                params.width = 0
+                params.height = ViewGroup.LayoutParams.WRAP_CONTENT
+                params.columnSpec = GridLayout.spec(j, 1f)
+                params.rowSpec = GridLayout.spec(i, 1f)
+                params.setMargins(0, 0, 0, 0)
+                button.layoutParams = params
 
                 gridLayout.addView(button)
             }
         }
     }
 
-    private fun realizarAccion(fila: Int, columna: Int) {
-        val valorCelda = obtenerValorCeldaEnPosicion(fila, columna)
+
+    private fun realizarAccion(fila: Int, columna: Int, button: Button) {
+        val valorCelda = button.text.toString()
 
         // Implementar la lógica específica según el valor de la celda
-        when (valorCelda) {
-            ' ' -> {
-                // Lógica cuando el valor es un espacio vacío
-            }
-            '*' -> {
-                // Lógica cuando el valor es una mina
-            }
-            // Puedes agregar más casos según tus necesidades
-            else -> {
-                // Lógica por defecto o para otros valores específicos
-            }
+        if (valorCelda == "*") {
+            button.setBackgroundColor(Color.RED)
+            mostrarMensaje("Has perdido")
+            Log.d("VALOR_CELDA",button.text.toString())
+        }else{
+            button.setBackgroundColor(Color.GREEN)
+            Log.d("VALOR_CELDA",button.text.toString())
         }
     }
 
-    private fun obtenerValorCeldaEnPosicion(fila: Int, columna: Int): Char {
-        return tablero[fila][columna]
+    private fun obtenerValorCeldaEnPosicion(fila: Int, columna: Int): Any {
+        val gridLayout = findViewById<GridLayout>(R.id.gridLayout)
+        val button = gridLayout.getChildAt(fila * gridLayout.columnCount + columna) as Button
+        return button.text
+    }
+
+    private fun mostrarMensaje(s: String) {
+        val builder = AlertDialog.Builder(this)
+        val mensaje = R.string.partidaPerdida
+
+        //aqui se le pasa el mensaje a msotrar en el alertDialog
+        builder.setMessage(mensaje)
+        //cuadno se le da al boton de aceptar se cierra el alertDialog
+        builder.setPositiveButton("Aceptar") { dialog, which ->
+            dialog.dismiss()
+        }
+        //se crea el alertDialog con el builder que contiene el mensaje y el boton de aceptar
+        val alertDialog = builder.create()
+        alertDialog.show()
     }
 
 
 }
+
 
 
 
