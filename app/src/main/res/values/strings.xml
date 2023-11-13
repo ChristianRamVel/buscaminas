@@ -19,4 +19,9 @@
     <string name="tituloDificultad">Seleccione la dificultad</string>
     <string name="aceptar">Acepar</string>
     <string name="tituloPersonaje">Seleccione el personaje</string>
+    <array name="dificultades">
+        <item>Principiante</item>
+        <item>Amateur</item>
+        <item>Avanzado</item>
+    </array>
 </resources>

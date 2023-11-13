@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
@@ -16,6 +15,7 @@ import android.widget.RadioGroup
 import android.widget.Spinner
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
+import androidx.core.view.setPadding
 import androidx.gridlayout.widget.GridLayout
 import kotlin.random.Random
 
@@ -35,7 +35,7 @@ class MainActivity : AppCompatActivity() {
 
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
-        val tablero = generarTablero("@string/principiante")
+        val tablero = generarTablero(getString(R.string.principiante))
         mostrarTableroEnPantalla(tablero)
     }
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -49,12 +49,12 @@ class MainActivity : AppCompatActivity() {
         return when (item.itemId) {
 
             R.id.instrucciones -> {
-                instrucciones(this)
+                instrucciones()
                 true
             }
 
             R.id.nuevoJuego -> {
-                nuevoJuego(dificultadSeleccionada ?: "@string/principiante")
+                nuevoJuego(dificultadSeleccionada ?: getString(R.string.principiante))
                 true
             }
 
@@ -77,19 +77,19 @@ class MainActivity : AppCompatActivity() {
         mostrarTableroEnPantalla(tablero)
     }
 
-    private fun instrucciones(context: Context) {
+    private fun instrucciones() {
 
         //alertDialog que saque un texto con las intrucciones de juego
         //y un boton de @string/aceptar
         //y que se pueda cerrar con el boton de atras
 
-        val builder = AlertDialog.Builder(context)
+        val builder = AlertDialog.Builder(this)
         val mensaje = R.string.textoInstrucciones
 
         //aqui se le pasa el mensaje a msotrar en el alertDialog
         builder.setMessage(mensaje)
         //cuadno se le da al boton de @string/aceptar se cierra el alertDialog
-        builder.setPositiveButton("@string/aceptar") { dialog, which ->
+        builder.setPositiveButton(R.string.aceptar) { dialog, which ->
             dialog.dismiss()
         }
         //se crea el alertDialog con el builder que contiene el mensaje y el boton de @string/aceptar
@@ -102,28 +102,28 @@ class MainActivity : AppCompatActivity() {
 
         //builder de alertdialog para mostrar los niveles de dificultad con radiobuton
         val builder = AlertDialog.Builder(this)
-        builder.setTitle("@string/seleccionaDificultad")
+        builder.setTitle(R.string.tituloDificultad)
 
         val radioGroup = RadioGroup(this)
         radioGroup.orientation = RadioGroup.VERTICAL
 
         val principiante = RadioButton(this)
-        principiante.text = "@string/principiante"
+        principiante.text = getString(R.string.principiante)
         radioGroup.addView(principiante)
         principiante.isChecked = true
 
         val amateur = RadioButton(this)
-        amateur.text = "@string/amateur"
+        amateur.text = getString(R.string.amateur)
         radioGroup.addView(amateur)
 
         val avanzado = RadioButton(this)
-        avanzado.text = "@string/avanzado"
+        avanzado.text = getString(R.string.avanzado)
         radioGroup.addView(avanzado)
         //se muestra el rediogroup
         builder.setView(radioGroup)
 
         //cuando se le da al boton de aceptar se cierra el alertDialog dando valor a dificultadSeleccionada, que por defecto eataria inicializada como Principiante
-        builder.setPositiveButton("@string/aceptar") { dialog, which ->
+        builder.setPositiveButton(R.string.aceptar) { dialog, which ->
 
             val checkedRadioButtonId = radioGroup.checkedRadioButtonId
             if (checkedRadioButtonId != -1) {
@@ -133,20 +133,20 @@ class MainActivity : AppCompatActivity() {
 
                 // aqui se llama a la funcion nuevoJuego con la dificultad seleccionada
                 when (dificultadSeleccionada) {
-                    "@string/principiante" -> {
+                    getString(R.string.principiante) -> {
                         // Lógica para el nivel Principiante
-                        nuevoJuego(dificultadSeleccionada ?: "principiante")
+                        nuevoJuego(dificultadSeleccionada ?: getString(R.string.principiante))
 
                     }
 
-                    "@string/amateur" -> {
+                    getString(R.string.amateur) -> {
                         // Lógica para el nivel Amateur
-                        nuevoJuego(dificultadSeleccionada ?: "amateur")
+                        nuevoJuego(dificultadSeleccionada ?: getString(R.string.amateur))
                     }
 
-                    "@string/avanzado" -> {
+                    getString(R.string.avanzado) -> {
                         // Lógica para el nivel Avanzado
-                        nuevoJuego(dificultadSeleccionada ?: "avanzado")
+                        nuevoJuego(dificultadSeleccionada ?: getString(R.string.avanzado))
                     }
                 }
             }
@@ -182,7 +182,7 @@ class MainActivity : AppCompatActivity() {
         builder.setView(spinner)
 
         //cuando se le da al boton de aceptar se cierra el alertDialog dando valor a personajeSeleccionado, que por defecto eataria inicializada como Personaje 1
-        builder.setPositiveButton("@string/aceptar") { dialog, which ->
+        builder.setPositiveButton(R.string.aceptar) { dialog, which ->
 
             var personajeSeleccionado = spinner.selectedItem.toString()
 
@@ -209,10 +209,10 @@ class MainActivity : AppCompatActivity() {
     fun generarTablero(nivelDificultad: String): Array<Array<Int>> {
 
         // Genera un tablero de acuerdo al nivel de dificultad seleccionado
-        val (filas, columnas, minas) = when (nivelDificultad.lowercase()) {
-            "@string/principiante" -> Triple(8, 8, Companion.MINAS_PRINCIPIANTE)
-            "@string/amateur" -> Triple(12, 12, MINAS_AMATEUR)
-            "@string/avanzado" -> Triple(16, 16, MINAS_AVANZADO)
+        val (filas, columnas, minas) = when (nivelDificultad) {
+            getString(R.string.principiante) -> Triple(8, 8, Companion.MINAS_PRINCIPIANTE)
+            getString(R.string.amateur) -> Triple(12, 12, MINAS_AMATEUR)
+            getString(R.string.avanzado) -> Triple(16, 16, MINAS_AVANZADO)
             //si por alguna razon no hay una dificultad seleccionada de las 3
             //se lanza esta exception que se vera en el Logcat
             else -> throw IllegalArgumentException("Nivel de dificultad no válido")
@@ -289,11 +289,11 @@ class MainActivity : AppCompatActivity() {
 
                 button.layoutParams = GridLayout.LayoutParams().apply {
                     width = 0
-                    height = ViewGroup.LayoutParams.WRAP_CONTENT
+                    height = 0
                     columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
                     rowSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
                 }
-
+                button.setPadding(0,0,0,0)
                 // Asigna un OnClickListener a cada botón
                 button.setOnClickListener {
                     // Lógica al ahcer clic en el boton
@@ -313,7 +313,7 @@ class MainActivity : AppCompatActivity() {
         // Implementa la logica segun el valor de la celda
         if (valorCelda == -1) {
             button.setBackgroundColor(Color.RED)
-            mostrarMensaje("@string/partidaPerdida")
+            mostrarMensaje(R.string.partidaPerdida)
 
         }else if(valorCelda == 0){
             cambiarColorBoton(fila, columna, Color.GREEN)
@@ -371,14 +371,14 @@ class MainActivity : AppCompatActivity() {
         button.setBackgroundColor(color)
     }
 
-    private fun mostrarMensaje(s: String) {
+    private fun mostrarMensaje(s: Int) {
         val builder = AlertDialog.Builder(this)
         val mensaje = R.string.partidaPerdida
 
         //aqui se le pasa el mensaje a msotrar en el alertDialog
         builder.setMessage(mensaje)
         //cuadno se le da al boton de @string/aceptar se cierra el alertDialog
-        builder.setPositiveButton("@string/aceptar") { dialog, which ->
+        builder.setPositiveButton(R.string.aceptar) { dialog, which ->
             dialog.dismiss()
         }
         //se crea el alertDialog con el builder que contiene el mensaje y el boton de @string/aceptar
