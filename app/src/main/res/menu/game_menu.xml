@@ -1,12 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:title=""
+        app:showAsAction="always"
+        android:icon="@drawable/terrorista"
+        />
 
     <item android:id="@+id/instrucciones"
-        android:title="@string/instrucciones" />
+        android:title="@string/instrucciones"
+        />
     <item android:id="@+id/nuevoJuego"
-        android:title="@string/nuevojuego"/>
+        android:title="@string/nuevojuego"
+        />
     <item android:id="@+id/configuracion"
-        android:title="@string/configurarJuego" />
+        android:title="@string/configurarJuego"
+        />
     <item android:id="@+id/seleccionarPersonaje"
         android:title="@string/seleccionarPersonaje"
         ></item>

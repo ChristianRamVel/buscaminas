@@ -14,7 +14,10 @@
         app:layout_constraintTop_toTopOf="parent"
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
         app:title="@string/app_name"
-        app:titleTextColor="@android:color/white" />
+        app:titleTextColor="@android:color/white">
+
+
+    </androidx.appcompat.widget.Toolbar>
 
     <androidx.gridlayout.widget.GridLayout
         android:id="@+id/gridLayout"
@@ -27,6 +30,7 @@
         >
 
     </androidx.gridlayout.widget.GridLayout>
+
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

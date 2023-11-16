@@ -11,7 +11,7 @@
     "4. Si se descubre una casilla con una minita, se pierde la partida y dejaras de ser un alfa.\n"
     "5. Pulsacion corta:Descubrir casilla, si hay una mina, pierdes, si no, se revelaran el resto de casillas cercanas sin minas.\n"
     "6. Pulsacion larga: Marcar casilla, si hay minita, se muestra como mina encontrada, si no, solo se descubrira esa casilla\n</string>
-    <string name="partidaPerdida">Has perdido</string>
+    <string name="partidaPerdida">Has perdido, si quieres puedes comenzar una nueva partida en el menu</string>
     <string name="partidaGanada">Has ganado</string>
     <string name="principiante">Principiante</string>
     <string name="amateur">Amateur</string>
@@ -19,6 +19,7 @@
     <string name="tituloDificultad">Seleccione la dificultad</string>
     <string name="aceptar">Acepar</string>
     <string name="tituloPersonaje">Seleccione el personaje</string>
+    <string name="cancelar">cancelar</string>
     <array name="dificultades">
         <item>Principiante</item>
         <item>Amateur</item>
