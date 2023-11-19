@@ -419,7 +419,7 @@ class MainActivity : AppCompatActivity() {
 
         if (celda.contenido == -1) {
             banderasColocadas++
-            button.background = getDrawable(R.drawable.terroristaencontrado)
+            button.background = getDrawable(R.drawable.terroristamuerto)
 
         }else{
             descubrirMinas(button, tablero)
