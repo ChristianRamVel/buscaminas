@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:title=""
+        android:title="imagenPersonaje"
+        android:id="@+id/imagenPersonaje"
         app:showAsAction="always"
         android:icon="@drawable/terrorista"
         />

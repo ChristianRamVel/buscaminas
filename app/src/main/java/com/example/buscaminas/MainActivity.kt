@@ -6,13 +6,16 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.Spinner
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
@@ -23,7 +26,7 @@ class MainActivity : AppCompatActivity() {
 
     var dificultadSeleccionada: String? = null
     var banderasColocadas: Int = 0
-
+    var indicePersonajeSeleccionado: Int = 0
 
     companion object {
         const val MINAS_PRINCIPIANTE = 10
@@ -172,35 +175,41 @@ class MainActivity : AppCompatActivity() {
         builder.setTitle(getString(R.string.seleccionarPersonaje))
 
         // Lista de nombres de personajes y recursos de imagen
-        val nombresPersonajes = listOf("Terrorista", "EEUU", "Rusia")
-
-        val imagenesPersonajes = listOf(R.drawable.terrorista
-                                        )
+        val nombresPersonajes = listOf("Tu primo", "Biden", "Putin")
+        val imagenesPersonajes = listOf(R.drawable.terrorista, R.drawable.biden, R.drawable.putin)
 
         // Crear un ArrayAdapter personalizado
-        val adapter = ArrayAdapter<String>(this, R.layout.item_personaje, R.id.textViewNombrePersonaje, nombresPersonajes)
+        val adapter = ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, nombresPersonajes)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
 
-        // Establecer un diseño personalizado para cada elemento
-        adapter.setDropDownViewResource(R.layout.item_personaje)
+        // Crear la vista personalizada del AlertDialog
+        val customLayout = layoutInflater.inflate(R.layout.item_personaje, null)
+        val spinner = customLayout.findViewById<Spinner>(R.id.spinnerPersonajes)
+        val imageViewPersonaje = customLayout.findViewById<ImageView>(R.id.imageViewPersonaje)
 
-        // Agregar el ArrayAdapter al Spinner
-        val spinner = Spinner(this)
+        // Configurar el Spinner y su adaptador
         spinner.adapter = adapter
+        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parentView: AdapterView<*>?, selectedItemView: View?, position: Int, id: Long) {
+                // Obtener la posición seleccionada y cargar la imagen correspondiente
+                val imagenPersonaje = imagenesPersonajes[position]
+                imageViewPersonaje.setImageResource(imagenPersonaje)
 
-        // Agregar el Spinner al diseño del AlertDialog
-        builder.setView(spinner)
+                indicePersonajeSeleccionado = position
+            }
+
+            override fun onNothingSelected(parentView: AdapterView<*>?) {
+                // Hacer algo si nada está seleccionado (opcional)
+            }
+        }
+
+        builder.setView(customLayout)
 
         // Manejar el evento de botón positivo
         builder.setPositiveButton(getString(R.string.aceptar)) { _, _ ->
             // Obtener el índice seleccionado y el nombre del personaje
             val indiceSeleccionado = spinner.selectedItemPosition
             val nombrePersonaje = nombresPersonajes[indiceSeleccionado]
-
-            // Obtener el recurso de imagen del personaje
-            //val imagenPersonaje = imagenesPersonajes[indiceSeleccionado]
-
-            // Lógica para manejar el personaje seleccionado
-            // ...
 
             // También puedes mostrar un mensaje aquí si lo necesitas
             Toast.makeText(this, "Personaje seleccionado: $nombrePersonaje", Toast.LENGTH_SHORT).show()
@@ -215,7 +224,6 @@ class MainActivity : AppCompatActivity() {
         val alertDialog = builder.create()
         alertDialog.show()
     }
-
 
     fun generarTablero(nivelDificultad: String): Array<Array<Celda>> {
 
@@ -411,7 +419,7 @@ class MainActivity : AppCompatActivity() {
 
         if (celda.contenido == -1) {
             banderasColocadas++
-            button.background = getDrawable(R.drawable.bandera)
+            button.background = getDrawable(R.drawable.terroristaencontrado)
 
         }else{
             descubrirMinas(button, tablero)
