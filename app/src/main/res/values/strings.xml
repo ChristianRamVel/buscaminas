@@ -8,11 +8,11 @@
     "1. El objetivo del juego es despejar un campo de minas sin toparte con ninguna.\n"
     "2. El juego se gana al descubrir todas las casillas que no tienen una minita esperandote.\n"
     "3. Si se descubre una casilla sin número, se revelan automáticamente todas las casillas vecinas.\n"
-    "4. Si se descubre una casilla con una minita, se pierde la partida y dejaras de ser un alfa.\n"
+    "4. Si se descubre una casilla con una mina, se pierde la partida.\n"
     "5. Pulsacion corta:Descubrir casilla, si hay una mina, pierdes, si no, se revelaran el resto de casillas cercanas sin minas.\n"
     "6. Pulsacion larga: Marcar casilla, si hay minita, se muestra como mina encontrada, si no, solo se descubrira esa casilla\n</string>
-    <string name="partidaPerdida">Has perdido, si quieres puedes comenzar una nueva partida en el menu</string>
-    <string name="partidaGanada">Has ganado</string>
+    <string name="partidaPerdida">Has perdido, jesucristo te invita a jugar otra partida pulsando nuevo juego en el menu para derrotar a los hijos de satanas</string>
+    <string name="partidaGanada">Has ganado, que Dios te bendiga hijo mio</string>
     <string name="principiante">Principiante</string>
     <string name="amateur">Amateur</string>
     <string name="avanzado">Avanzado</string>
@@ -24,5 +24,10 @@
         <item>Principiante</item>
         <item>Amateur</item>
         <item>Avanzado</item>
+    </array>
+    <array name="personajes">
+        <item>terrorista</item>
+        <item>personaje2</item>
+        <item>personaje3</item>
     </array>
 </resources>

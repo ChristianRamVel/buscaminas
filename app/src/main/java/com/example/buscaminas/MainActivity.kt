@@ -1,13 +1,11 @@
 package com.example.buscaminas
 
-import android.content.Context
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
-import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.Button
@@ -18,15 +16,14 @@ import android.widget.Spinner
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
-import androidx.core.content.res.TypedArrayUtils
-import androidx.core.view.setPadding
 import androidx.gridlayout.widget.GridLayout
 import kotlin.random.Random
 
 class MainActivity : AppCompatActivity() {
 
     var dificultadSeleccionada: String? = null
-    var celdasSinBomba = 1
+    var banderasColocadas: Int = 0
+
 
     companion object {
         const val MINAS_PRINCIPIANTE = 10
@@ -78,13 +75,7 @@ class MainActivity : AppCompatActivity() {
     }
     private fun nuevoJuego(dificultad: String) {
         val tablero = generarTablero(dificultad)
-        if (dificultad == getString(R.string.principiante)) {
-            celdasSinBomba = 64 - MINAS_PRINCIPIANTE
-        } else if (dificultad == getString(R.string.amateur)) {
-            celdasSinBomba = 144 - MINAS_AMATEUR
-        } else if (dificultad == getString(R.string.avanzado)) {
-            celdasSinBomba = 256 - MINAS_AVANZADO
-        }
+        banderasColocadas = 0
         mostrarTableroEnPantalla(tablero)
     }
 
@@ -181,11 +172,10 @@ class MainActivity : AppCompatActivity() {
         builder.setTitle(getString(R.string.seleccionarPersonaje))
 
         // Lista de nombres de personajes y recursos de imagen
-        val nombresPersonajes = listOf("Terrorista", "EEUU", "Otegui")
+        val nombresPersonajes = listOf("Terrorista", "EEUU", "Rusia")
 
-        val imagenesPersonajes = listOf(R.drawable.terrorista,
-                                        R.drawable.eeuu,
-                                        R.drawable.otegui)
+        val imagenesPersonajes = listOf(R.drawable.terrorista
+                                        )
 
         // Crear un ArrayAdapter personalizado
         val adapter = ArrayAdapter<String>(this, R.layout.item_personaje, R.id.textViewNombrePersonaje, nombresPersonajes)
@@ -227,7 +217,7 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    fun generarTablero(nivelDificultad: String): Array<Array<Int>> {
+    fun generarTablero(nivelDificultad: String): Array<Array<Celda>> {
 
         // Genera un tablero de acuerdo al nivel de dificultad seleccionado
         val (filas, columnas, minas) = when (nivelDificultad) {
@@ -247,43 +237,40 @@ class MainActivity : AppCompatActivity() {
         tab.colocarMinas(tab.celdas, minas)
         tab.calcularNumeros(tab.celdas)
 
-        return tab.celdas
+        return tab.celdas.map { row ->
+            row.map { contenido ->
+                Celda(false, contenido)
+            }.toTypedArray()
+        }.toTypedArray()
     }
-    private fun realizarAccion(fila: Int, columna: Int, button: Button, tablero: Array<Array<Int>>) {
+    private fun descubirCelda(fila: Int, columna: Int, button: Button, tablero: Array<Array<Celda>>) {
+        val celda = tablero[fila][columna]
+
         // Verifica si ya se ha hecho clic en este botón
-       // if (button.text.toString().isNotEmpty()) {
-        //    return
-        //}
-        val valorCelda = tablero[fila][columna]
+        if (celda.descubierta) {
+            return
+        }
 
-        // Implementa la lógica según el valor de la celda
-        if (valorCelda == -1) {
+        if (celda.contenido == -1) {
             // Mina encontrada
-            button.setBackgroundColor(Color.RED)
-            mostrarMensaje(R.string.partidaPerdida)
-            button.text = valorCelda.toString()
-
-        } else if (valorCelda == 0) {
-            // Celda vacía
-            cambiarColorBoton(fila, columna, Color.GREEN)
+            descubrirMinas(button, tablero)
+            mostrarMensaje(getString(R.string.partidaPerdida))
+        } else if(celda.contenido == 0) {
+            // No hay minas alrededor
             revelarBotonesAdyacentes(tablero, fila, columna)
-            button.text = valorCelda.toString()
         } else {
-            // Otras celdas
-            cambiarColorBoton(fila, columna, Color.GREEN)
-            button.text = valorCelda.toString()
+            // Hay minas alrededor
+            cambiarTextoBoton(tablero, fila, columna)
         }
 
-
-
-        if (celdasSinBomba == 0) {
-            mostrarMensaje(R.string.partidaGanada)
-        }
+        // Marcar la celda como descubierta
+        celda.descubierta = true
     }
 
-    private fun revelarBotonesAdyacentes(tablero: Array<Array<Int>>, fila: Int, columna: Int) {
-        // Verifica si el valor en la posición actual es 0
-        if (tablero[fila][columna] == 0) {
+
+    private fun revelarBotonesAdyacentes(tablero: Array<Array<Celda>>, fila: Int, columna: Int) {
+        // Verifica si el valor de la celda es 0 (sin bomba)
+        if (tablero[fila][columna].contenido == 0 && !tablero[fila][columna].descubierta) {
             // Crea una lista para almacenar las posiciones de los botones adyacentes
             val posicionesARevelar = mutableListOf<Pair<Int, Int>>()
 
@@ -292,17 +279,19 @@ class MainActivity : AppCompatActivity() {
 
             // Itera sobre las posiciones y cambia el color de los botones
             for ((fila, columna) in posicionesARevelar) {
-                cambiarColorBoton(fila, columna, Color.GREEN)
+                //cambiarColorBoton(fila, columna, Color.GREEN)
+                cambiarTextoBoton(tablero, fila, columna)
             }
 
             // Verifica si todas las celdas sin bomba han sido descubiertas después de revelar las adyacentes
-            if (celdasSinBomba == 0) {
-                mostrarMensaje(R.string.partidaGanada)
+            if (posicionesARevelar.size == tablero.size * tablero[0].size - tablero.size) {
+                mostrarMensaje(getString(R.string.partidaGanada))
             }
         }
     }
 
-    private fun revelarBotonesAdyacentesRecursivo(tablero: Array<Array<Int>>, fila: Int, columna: Int, posicionesARevelar: MutableList<Pair<Int, Int>>) {
+
+    private fun revelarBotonesAdyacentesRecursivo(tablero: Array<Array<Celda>>, fila: Int, columna: Int, posicionesARevelar: MutableList<Pair<Int, Int>>) {
         // Verifica si la posición está dentro de los límites del tablero
         if (fila in 0 until tablero.size && columna in 0 until tablero[0].size) {
             // Verifica si la posición ya fue revelada
@@ -311,7 +300,7 @@ class MainActivity : AppCompatActivity() {
                 posicionesARevelar.add(Pair(fila, columna))
 
                 // Verifica si la posición tiene un valor de 0 (sin bomba)
-                if (tablero[fila][columna] == 0) {
+                if (tablero[fila][columna].contenido == 0) {
                     // Llama recursivamente a las posiciones adyacentes
                     for (i in -1..1) {
                         for (j in -1..1) {
@@ -321,45 +310,51 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 // Establece el texto del botón cuando se revela
-                cambiarTextoBoton(fila, columna, tablero[fila][columna].toString())
-
-                // Verifica si se ha ganado la partida después de revelar cada celda
-                if (celdasSinBomba == 0) {
-                    mostrarMensaje(R.string.partidaGanada)
-                }
+                cambiarTextoBoton(tablero,fila, columna)
             }
         }
     }
 
 
-    private fun cambiarTextoBoton(fila: Int, columna: Int, texto: String) {
+    private fun cambiarTextoBoton(tablero: Array<Array<Celda>>, fila: Int, columna: Int) {
         val gridLayout = findViewById<GridLayout>(R.id.gridLayout)
         val button = gridLayout.getChildAt(fila * gridLayout.columnCount + columna) as Button
-        button.text = texto
+        button.text = tablero[fila][columna].contenido.toString()
+    }
+
+    private fun cambiarFondoBombas(fila: Int, columna: Int, texto: String) {
+        val gridLayout = findViewById<GridLayout>(R.id.gridLayout)
+        val button = gridLayout.getChildAt(fila * gridLayout.columnCount + columna) as Button
+        button.background = getDrawable(R.drawable.terrorista)
     }
 
 
-    private fun cambiarColorBoton(fila: Int, columna: Int ,color: Int) {
-        val gridLayout = findViewById<GridLayout>(R.id.gridLayout)
-        val button = gridLayout.getChildAt(fila * gridLayout.columnCount + columna) as Button
-        button.setBackgroundColor(color)
-    }
 
-    private fun mostrarMensaje(s: Int) {
+
+    private fun mostrarMensaje(mensaje: String) {
         val builder = AlertDialog.Builder(this)
-        val mensaje = R.string.partidaPerdida
 
-        //aqui se le pasa el mensaje a msotrar en el alertDialog
-        builder.setMessage(mensaje)
-        //cuadno se le da al boton de @string/aceptar se cierra el alertDialog
-        builder.setPositiveButton(R.string.aceptar) { dialog, which ->
-            dialog.dismiss()
+        if (mensaje.equals(getString(R.string.partidaGanada)) || mensaje.equals(getString(R.string.partidaPerdida))) {
+            // Configurar el mensaje
+            builder.setMessage(mensaje)
+
+            // Configurar la imagen
+            val imageView = ImageView(this)
+            imageView.setImageResource(R.drawable.jisus)  // Reemplaza "tu_imagen" con el nombre de tu imagen en res/drawable
+            builder.setView(imageView)
+
+            // Configurar el botón de aceptar
+            builder.setPositiveButton(R.string.aceptar) { dialog, which ->
+                dialog.dismiss()
+            }
+
+            // Crear y mostrar el AlertDialog
+            val alertDialog = builder.create()
+            alertDialog.show()
         }
-        //se crea el alertDialog con el builder que contiene el mensaje y el boton de @string/aceptar
-        val alertDialog = builder.create()
-        alertDialog.show()
     }
-    private fun mostrarTableroEnPantalla(tablero: Array<Array<Int>>) {
+
+    private fun mostrarTableroEnPantalla(tablero: Array<Array<Celda>>) {
         val gridLayout = findViewById<GridLayout>(R.id.gridLayout)
         gridLayout.removeAllViews()  // Elimina vistas existentes antes de agregar nuevas
 
@@ -372,30 +367,78 @@ class MainActivity : AppCompatActivity() {
         for (i in tablero.indices) {
             for (j in tablero[0].indices) {
                 val button = Button(this)
-
-                // Configura el texto del botón con una cadena vacía
-                //button.text = ""
                 //mostrar valor de la celda en el boton
-                button.text = tablero[i][j].toString()
+                //button.text = tablero[i][j].contenido.toString()
 
                 button.layoutParams = GridLayout.LayoutParams().apply {
                     width = 0
                     height = 0
                     columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
                     rowSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
+                    button.height = ViewGroup.LayoutParams.MATCH_PARENT
                 }
                 button.setPadding(0, 0, 0, 0)
 
                 // Asigna un OnClickListener a cada botón
                 button.setOnClickListener {
                     // Lógica al hacer clic en el botón
-                    realizarAccion(i, j, button, tablero)
+                    descubirCelda(i, j, button, tablero)
+                }
+
+                button.setOnLongClickListener {
+                    ponerBandera(i, j, button, tablero)
+
                 }
 
                 gridLayout.addView(button)
             }
         }
     }
+
+    private fun ponerBandera(fila: Int, columna: Int, button: Button, tablero: Array<Array<Celda>>): Boolean {
+        val celda = tablero[fila][columna]
+
+        var numeroMinas = when{
+            dificultadSeleccionada.equals(getString(R.string.principiante)) -> MINAS_PRINCIPIANTE
+            dificultadSeleccionada.equals(getString(R.string.amateur)) -> MINAS_AMATEUR
+            dificultadSeleccionada.equals(getString(R.string.avanzado)) -> MINAS_AVANZADO
+            else -> MINAS_PRINCIPIANTE
+        }
+
+        if (celda.descubierta) {
+            return false
+        }
+
+        if (celda.contenido == -1) {
+            banderasColocadas++
+            button.background = getDrawable(R.drawable.bandera)
+
+        }else{
+            descubrirMinas(button, tablero)
+            mostrarMensaje(getString(R.string.partidaPerdida))
+
+        }
+
+        if (banderasColocadas == numeroMinas) {
+            mostrarMensaje(getString(R.string.partidaGanada))
+        }
+        return true
+    }
+
+
+
+    //descubrir todas las minas del tablero
+    private fun descubrirMinas(button: Button, tablero: Array<Array<Celda>>) {
+        for (i in tablero.indices) {
+            for (j in tablero[0].indices) {
+                val celda = tablero[i][j]
+                if (celda.contenido == -1) {
+                    cambiarFondoBombas(i, j, celda.contenido.toString())
+                }
+            }
+        }
+    }
+
 
 }
 
